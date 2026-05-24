@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Daily Entry Report</title>
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --font-body: 'Satoshi', 'Segoe UI', sans-serif;
+    --color-bg: #f4f6fb;
+    --color-surface: #ffffff;
+    --color-border: #d0d7e2;
+    --color-divider: #e4e8f0;
+    --color-text: #1a2233;
+    --color-text-muted: #5a6680;
+    --color-text-faint: #9aa3b5;
+    --color-primary: #1a56db;
+    --color-primary-light: #ebf0fd;
+    --color-primary-hover: #1245b5;
+    --color-header-1: #1e3a5f;
+    --color-header-2: #14532d;
+    --color-header-3: #7c2d12;
+    --color-header-4: #4c1d95;
+    --color-row-alt: #f8f9fc;
+    --color-row-hover: #eff3fb;
+    --color-success: #16a34a;
+    --color-error: #dc2626;
+    --color-drive-green: #0f9d58;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.07);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.09);
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-font-smoothing: antialiased; }
+  body {
+    font-family: var(--font-body);
+    background: var(--color-bg);
+    color: var(--color-text);
+    min-height: 100dvh;
+    font-size: 14px;
+  }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    background: #1a2233;
+    color: #fff;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow-md);
+    gap: 10px;
+  }
+  .topbar-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .topbar-title {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+  }
+  .topbar-title svg { opacity: 0.85; flex-shrink: 0; }
+  .topbar-date {
+    font-size: 12px;
+    color: #9aabbf;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .topbar-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+  /* ── DRIVE BUTTONS ── */
+  .btn-drive {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 13px;
+    border-radius: 8px;
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: background 0.15s, transform 0.1s, opacity 0.15s;
+    white-space: nowrap;
+  }
+  .btn-drive:active { transform: scale(0.96); }
+  .btn-signin {
+    background: #fff;
+    color: #1a2233;
+  }
+  .btn-signin:hover { background: #f0f3fa; }
+  .btn-save {
+    background: var(--color-drive-green);
+    color: #fff;
+  }
+  .btn-save:hover { background: #0a7a46; }
+  .btn-load {
+    background: #4285f4;
+    color: #fff;
+  }
+  .btn-load:hover { background: #2c6fd6; }
+  .btn-signout {
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+    padding: 7px 10px;
+  }
+  .btn-signout:hover { background: rgba(255,255,255,0.2); }
+  .btn-drive svg { flex-shrink: 0; }
+  .btn-drive:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* ── SYNC STATUS BAR ── */
+  .sync-bar {
+    background: #e8f5e9;
+    border-bottom: 1px solid #c8e6c9;
+    padding: 7px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #1b5e20;
+    font-weight: 500;
+    min-height: 36px;
+    transition: background 0.3s;
+  }
+  .sync-bar.syncing { background: #fff3e0; border-color: #ffe082; color: #bf6000; }
+  .sync-bar.error { background: #fdecea; border-color: #f5c6c6; color: #b71c1c; }
+  .sync-bar.hidden { display: none; }
+  .sync-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--color-drive-green);
+    flex-shrink: 0;
+  }
+  .sync-bar.syncing .sync-dot { background: #ff9800; animation: pulse 1s infinite; }
+  .sync-bar.error .sync-dot { background: var(--color-error); }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* ── USER CHIP ── */
+  .user-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.1);
+    padding: 4px 10px 4px 4px;
+    border-radius: 20px;
+  }
+  .user-avatar {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: #4285f4;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; color: #fff;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .user-name { font-size: 12px; color: #c8d8f0; max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* ── LAYOUT ── */
+  .page {
+    padding: 16px 16px 80px;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+  .tables-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 800px) {
+    .tables-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ── TABLE CARD ── */
+  .table-card {
+    background: var(--color-surface);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--color-divider);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .table-title {
+    padding: 12px 16px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .table-card:nth-child(1) .table-title { background: var(--color-header-1); }
+  .table-card:nth-child(2) .table-title { background: var(--color-header-2); }
+  .table-card:nth-child(3) .table-title { background: var(--color-header-3); }
+  .table-card:nth-child(4) .table-title { background: var(--color-header-4); }
+
+  .badge-count {
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+    padding: 2px 9px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── SCROLLABLE TABLE ── */
+  .table-scroll {
+    flex: 1;
+    overflow-y: auto;
+    max-height: 260px;
+    scrollbar-width: thin;
+    scrollbar-color: #c5ccd8 transparent;
+  }
+  .table-scroll::-webkit-scrollbar { width: 5px; }
+  .table-scroll::-webkit-scrollbar-thumb { background: #c5ccd8; border-radius: 3px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  thead { position: sticky; top: 0; z-index: 10; }
+  thead th {
+    padding: 8px 10px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    white-space: nowrap;
+    border-bottom: 2px solid var(--color-divider);
+    background: #f0f3fa;
+    color: var(--color-text-muted);
+  }
+  thead th:first-child { padding-left: 14px; }
+  tbody tr { border-bottom: 1px solid var(--color-divider); transition: background 0.12s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:nth-child(even) { background: var(--color-row-alt); }
+  tbody tr:hover { background: var(--color-row-hover); }
+  tbody td { padding: 8px 10px; color: var(--color-text); vertical-align: middle; }
+  tbody td:first-child { padding-left: 14px; }
+  .empty-row td {
+    text-align: center;
+    color: var(--color-text-faint);
+    font-size: 12px;
+    padding: 18px;
+    font-style: italic;
+  }
+  .delete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #ccc;
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: color 0.15s, background 0.15s;
+    line-height: 1;
+  }
+  .delete-btn:hover { color: var(--color-error); background: #fdecea; }
+
+  /* ── ADD ROW FORM ── */
+  .add-row-form {
+    border-top: 2px solid var(--color-divider);
+    padding: 10px 14px;
+    background: #f8f9fc;
+    flex-shrink: 0;
+  }
+  .form-label {
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 7px;
+    display: block;
+  }
+  .form-fields {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: flex-end;
+  }
+  .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex: 1;
+    min-width: 70px;
+  }
+  .field-group label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  input[type="text"], input[type="number"], input[type="date"] {
+    width: 100%;
+    padding: 7px 9px;
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-body);
+    font-size: 13px;
+    color: var(--color-text);
+    background: #fff;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    /* Android: prevent zoom on focus */
+    font-size: max(13px, 16px);
+  }
+  @media (min-width: 600px) {
+    input[type="text"], input[type="number"], input[type="date"] { font-size: 13px; }
+  }
+  input:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(26,86,219,0.12);
+  }
+  .btn-add {
+    padding: 8px 16px;
+    background: var(--color-primary);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: background 0.15s, transform 0.1s;
+    align-self: flex-end;
+    height: 38px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .btn-add:hover { background: var(--color-primary-hover); }
+  .btn-add:active { transform: scale(0.97); }
+  .table-card:nth-child(1) .btn-add { background: var(--color-header-1); }
+  .table-card:nth-child(1) .btn-add:hover { background: #162e4d; }
+  .table-card:nth-child(2) .btn-add { background: var(--color-header-2); }
+  .table-card:nth-child(2) .btn-add:hover { background: #0f3d20; }
+  .table-card:nth-child(3) .btn-add { background: var(--color-header-3); }
+  .table-card:nth-child(3) .btn-add:hover { background: #5c1d09; }
+  .table-card:nth-child(4) .btn-add { background: var(--color-header-4); }
+  .table-card:nth-child(4) .btn-add:hover { background: #3b1570; }
+
+  /* ── FLOATING SAVE FAB ── */
+  .fab-save {
+    position: fixed;
+    bottom: 24px;
+    right: 20px;
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: var(--color-drive-green);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 20px rgba(15,157,88,0.45);
+    z-index: 200;
+    transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
+    font-size: 22px;
+  }
+  .fab-save:active { transform: scale(0.93); }
+  .fab-save:hover { background: #0a7a46; box-shadow: 0 6px 24px rgba(15,157,88,0.55); }
+  .fab-save.hidden { display: none; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 500;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .modal-overlay.show { opacity: 1; pointer-events: all; }
+  .modal {
+    background: #fff;
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    max-width: 400px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    transform: translateY(20px);
+    transition: transform 0.25s;
+  }
+  .modal-overlay.show .modal { transform: translateY(0); }
+  .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 10px; color: var(--color-text); }
+  .modal-body { font-size: 13.5px; color: var(--color-text-muted); line-height: 1.6; margin-bottom: 18px; }
+  .modal-body a { color: var(--color-primary); text-decoration: none; font-weight: 600; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+  .modal-btn {
+    padding: 9px 20px;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    min-height: 44px;
+    transition: background 0.15s;
+  }
+  .modal-btn-primary { background: var(--color-primary); color: #fff; }
+  .modal-btn-primary:hover { background: var(--color-primary-hover); }
+  .modal-btn-secondary { background: var(--color-divider); color: var(--color-text); }
+  .modal-btn-secondary:hover { background: var(--color-border); }
+  .steps-list { padding-left: 18px; margin-top: 8px; }
+  .steps-list li { font-size: 12.5px; color: var(--color-text-muted); margin-bottom: 5px; line-height: 1.5; }
+  .steps-list code {
+    background: #f0f3fa;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 11.5px;
+    color: var(--color-text);
+    font-family: 'Courier New', monospace;
+  }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #1a2233;
+    color: #fff;
+    padding: 11px 20px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+    opacity: 0;
+    transition: opacity 0.25s, transform 0.25s;
+    pointer-events: none;
+    z-index: 999;
+    max-width: calc(100vw - 40px);
+    text-align: center;
+    white-space: pre-line;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  #toast.success { background: var(--color-drive-green); }
+  #toast.error-toast { background: var(--color-error); }
+
+  /* ── LOADING OVERLAY ── */
+  .loading-overlay {
+    position: fixed; inset: 0;
+    background: rgba(255,255,255,0.85);
+    z-index: 600;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .loading-overlay.show { opacity: 1; pointer-events: all; }
+  .spinner {
+    width: 44px; height: 44px;
+    border: 3px solid var(--color-divider);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-size: 14px; font-weight: 600; color: var(--color-text-muted); }
+  .client-setup-card { display:none; background:#fff; border:1px solid var(--color-border); border-radius:16px; padding:16px; margin-bottom:14px; box-shadow: var(--shadow-sm); }
+  .client-setup-card.show { display:block; }
+  .client-setup-row { display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end; }
+  .client-setup-row input { flex:1; min-width:240px; padding:10px 12px; border:1.5px solid var(--color-border); border-radius:8px; font-size:14px; font-family:inherit; }
+  .client-setup-row button { min-height:44px; }
+</style>
+</head>
+<body>
+
+<!-- Loading overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loadingText">Loading…</div>
+</div>
+
+<!-- Confirm modal -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal">
+    <div class="modal-title" id="modalTitle">Confirm Action</div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="modal-btn modal-btn-primary" id="modalConfirmBtn">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="topbar-title">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Daily Entry
+    </div>
+    <div class="topbar-date" id="topbarDate"></div>
+  </div>
+  <div class="topbar-actions" id="topbarActions"><span id="authStatus" style="display:none;color:#ffd166;font-size:12px;margin-right:8px;"></span>
+    <button class="btn-drive btn-signin" id="btnSignIn" onclick="signIn()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      Sign in with Google
+    </button>
+    <div id="signedInActions" style="display:none; align-items:center; gap:8px;">
+      <div class="user-chip" id="userChip">
+        <div class="user-avatar" id="userAvatar">?</div>
+        <span class="user-name" id="userName">User</span>
+      </div>
+      <button class="btn-drive btn-save" id="btnSave" onclick="saveToDrive()" title="Save to Drive">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.2 15c.7-1.2 1-2.5.7-3.9-.6-2-2.4-3.5-4.4-3.5h-1.2C15.4 5 13.3 3.5 11 3.5c-3 0-5.5 2.5-5.5 5.5 0 .3 0 .6.1.9C3.5 10.6 2 12.4 2 14.5 2 17 4 19 6.5 19H19c1.9 0 3.5-1.5 3.7-3.4-.1-.2-.3-.4-.5-.6z"/><polyline points="8 17 12 13 16 17"/><line x1="12" y1="13" x2="12" y2="21"/></svg>
+        Save
+      </button>
+      <button class="btn-drive btn-load" id="btnLoad" onclick="loadFromDrive()" title="Load from Drive">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.2 15c.7-1.2 1-2.5.7-3.9-.6-2-2.4-3.5-4.4-3.5h-1.2C15.4 5 13.3 3.5 11 3.5c-3 0-5.5 2.5-5.5 5.5 0 .3 0 .6.1.9C3.5 10.6 2 12.4 2 14.5 2 17 4 19 6.5 19H19c1.9 0 3.5-1.5 3.7-3.4-.1-.2-.3-.4-.5-.6z"/><polyline points="8 13 12 17 16 13"/><line x1="12" y1="17" x2="12" y2="9"/></svg>
+        Load
+      </button>
+      <button class="btn-drive btn-signout" onclick="signOut()" title="Sign out">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Sync status bar -->
+<div class="sync-bar hidden" id="syncBar">
+  <div class="sync-dot"></div>
+  <span id="syncMsg">Connected to Google Drive</span>
+</div>
+
+<div class="page">
+
+  <div class="client-setup-card" id="setupPanel" style="display:block; background:#fff; border:1px solid var(--color-border); border-radius:12px; padding:12px 14px; margin-bottom:12px; max-width:980px;">
+    <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;">
+      <div>
+        <div style="font-size:13px;font-weight:700;margin-bottom:4px;">Google Drive Setup Required</div>
+        <div style="font-size:12px;color:var(--color-text-muted);line-height:1.4;">Paste your Google OAuth Client ID once. The app will autosave to Drive when connected, and you can still save locally with one button.</div>
+      </div>
+      <button class="btn-drive btn-signin" id="toggleClientBtn" onclick="toggleClientBox()">Show / Hide</button>
+    </div>
+    <div id="setupInner" style="margin-top:10px; display:block;">
+      <div class="client-setup-row">
+        <input type="text" id="clientIdInputTop" placeholder="xxxxx.apps.googleusercontent.com" style="font-size:13px;padding:8px 10px;min-width:240px;" />
+        <button class="btn-drive btn-save" onclick="saveClientIdTop()" style="padding:8px 12px;min-height:40px;">Save Client ID</button>
+        <button class="btn-drive btn-load" onclick="saveLocalBackupNow()" style="padding:8px 12px;min-height:40px;">Save Local</button>
+        <button class="btn-drive btn-signin" onclick="downloadBackup()" style="padding:8px 12px;min-height:40px;">Download Backup</button>
+        <label class="btn-drive btn-signin" style="padding:8px 12px;min-height:40px;cursor:pointer;">Upload Backup<input type="file" accept="application/json" onchange="uploadBackup(event)" style="display:none"></label>
+      </div>
+      <div id="setupStatus" style="font-size:11.5px;color:var(--color-text-faint);margin-top:8px;">After saving the Client ID once, you do not need to paste it again on this browser.</div>
+    </div>
+  </div>
+
+<div class="tables-grid">
+
+    <!-- TABLE 1: Bangalore Parcel -->
+    <div class="table-card">
+      <div class="table-title">
+        📦 Bangalore Parcel
+        <span class="badge-count" id="count1">0 entries</span>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Supplier / Name</th>
+              <th>Date</th>
+              <th>Qty</th>
+              <th>Paid (₹)</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tbody1">
+            <tr class="empty-row"><td colspan="5">No entries yet — add one below</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="add-row-form">
+        <span class="form-label">+ Add New Entry</span>
+        <div class="form-fields">
+          <div class="field-group">
+            <label>Supplier / Name</label>
+            <input type="text" id="t1_name" placeholder="e.g. Mangalam" />
+          </div>
+          <div class="field-group" style="max-width:125px;">
+            <label>Date</label>
+            <input type="date" id="t1_date" />
+          </div>
+          <div class="field-group" style="max-width:80px;">
+            <label>Qty</label>
+            <input type="number" id="t1_qty" placeholder="0" min="0" />
+          </div>
+          <div class="field-group" style="max-width:100px;">
+            <label>Paid (₹)</label>
+            <input type="number" id="t1_paid" placeholder="0" min="0" />
+          </div>
+          <button class="btn-add" onclick="addRow(1)">Add ✓</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABLE 2: Supplier Details -->
+    <div class="table-card">
+      <div class="table-title">
+        🏪 Supplier Details
+        <span class="badge-count" id="count2">0 entries</span>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Supplier Name</th>
+              <th>Date</th>
+              <th>Number</th>
+              <th>Values (₹)</th>
+              <th>GST Bill No.</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tbody2">
+            <tr class="empty-row"><td colspan="6">No entries yet — add one below</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="add-row-form">
+        <span class="form-label">+ Add New Entry</span>
+        <div class="form-fields">
+          <div class="field-group">
+            <label>Supplier Name</label>
+            <input type="text" id="t2_name" placeholder="Name" />
+          </div>
+          <div class="field-group" style="max-width:125px;">
+            <label>Date</label>
+            <input type="date" id="t2_date" />
+          </div>
+          <div class="field-group" style="max-width:90px;">
+            <label>Number</label>
+            <input type="text" id="t2_num" placeholder="—" />
+          </div>
+          <div class="field-group" style="max-width:95px;">
+            <label>Values (₹)</label>
+            <input type="number" id="t2_val" placeholder="0" min="0" />
+          </div>
+          <div class="field-group" style="max-width:100px;">
+            <label>GST Bill No.</label>
+            <input type="text" id="t2_gst" placeholder="—" />
+          </div>
+          <button class="btn-add" onclick="addRow(2)">Add ✓</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABLE 3: Customer Sales -->
+    <div class="table-card">
+      <div class="table-title">
+        🧾 Customer Sales
+        <span class="badge-count" id="count3">0 entries</span>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Customer / Mobile</th>
+              <th>Date</th>
+              <th>SS/MM</th>
+              <th>Bill No.</th>
+              <th>Amount (₹)</th>
+              <th>Cash (₹)</th>
+              <th>Credit</th>
+              <th>Balance (₹)</th>
+              <th>Purch. Ref.</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tbody3">
+            <tr class="empty-row"><td colspan="10">No entries yet — add one below</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="add-row-form">
+        <span class="form-label">+ Add New Entry</span>
+        <div class="form-fields">
+          <div class="field-group">
+            <label>Customer / Mobile</label>
+            <input type="text" id="t3_name" placeholder="Name / Number" />
+          </div>
+          <div class="field-group" style="max-width:125px;">
+            <label>Date</label>
+            <input type="date" id="t3_date" />
+          </div>
+          <div class="field-group" style="max-width:70px;">
+            <label>SS/MM</label>
+            <input type="text" id="t3_ssmm" placeholder="—" />
+          </div>
+          <div class="field-group" style="max-width:80px;">
+            <label>Bill No.</label>
+            <input type="text" id="t3_bill" placeholder="—" />
+          </div>
+          <div class="field-group" style="max-width:90px;">
+            <label>Amount (₹)</label>
+            <input type="number" id="t3_amt" placeholder="0" min="0" />
+          </div>
+          <div class="field-group" style="max-width:80px;">
+            <label>Cash (₹)</label>
+            <input type="number" id="t3_cash" placeholder="0" min="0" />
+          </div>
+          <div class="field-group" style="max-width:80px;">
+            <label>Credit</label>
+            <input type="text" id="t3_credit" placeholder="—" />
+          </div>
+          <div class="field-group" style="max-width:90px;">
+            <label>Balance (₹)</label>
+            <input type="number" id="t3_bal" placeholder="0" min="0" />
+          </div>
+          <div class="field-group" style="max-width:90px;">
+            <label>Purch. Ref.</label>
+            <input type="text" id="t3_ref" placeholder="—" />
+          </div>
+          <button class="btn-add" onclick="addRow(3)">Add ✓</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABLE 4: Daily Collection -->
+    <div class="table-card">
+      <div class="table-title">
+        💰 Daily Collection
+        <span class="badge-count" id="count4">0 entries</span>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Cash (₹)</th>
+              <th>Cheques (₹)</th>
+              <th>No.</th>
+              <th>K2 &amp; Others (₹)</th>
+              <th>Reference No.</th>
+              <th>Credit</th>
+              <th>Bank A/C No.</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tbody4">
+            <tr class="empty-row"><td colspan="9">No entries yet — add one below</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="add-row-form">
+        <span class="form-label">+ Add New Entry</span>
+        <div class="form-fields">
+          <div class="field-group" style="max-width:125px;">
+            <label>Date</label>
+            <input type="date" id="t4_date" />
+          </div>
+          <div class="field-group" style="max-width:90px;">
+            <label>Cash (₹)</label>
+            <input type="number" id="t4_cash" placeholder="0" min="0" />
+          </div>
+          <div class="field-group" style="max-width:90px;">
+            <label>Cheques (₹)</label>
+            <input type="number" id="t4_chq" placeholder="0" min="0" />
+          </div>
+          <div class="field-group" style="max-width:70px;">
+            <label>No.</label>
+            <input type="text" id="t4_no" placeholder="—" />
+          </div>
+          <div class="field-group" style="max-width:100px;">
+            <label>K2 &amp; Others (₹)</label>
+            <input type="number" id="t4_k2" placeholder="0" min="0" />
+          </div>
+          <div class="field-group" style="max-width:100px;">
+            <label>Reference No.</label>
+            <input type="text" id="t4_ref" placeholder="—" />
+          </div>
+          <div class="field-group" style="max-width:80px;">
+            <label>Credit</label>
+            <input type="text" id="t4_credit" placeholder="—" />
+          </div>
+          <div class="field-group" style="max-width:100px;">
+            <label>Bank A/C No.</label>
+            <input type="text" id="t4_bank" placeholder="—" />
+          </div>
+          <button class="btn-add" onclick="addRow(4)">Add ✓</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /tables-grid -->
+
+  <div style="margin-top:14px;background:#fff;border:1px solid var(--color-border);border-radius:14px;padding:12px 14px;box-shadow:var(--shadow-sm);font-size:12.5px;color:var(--color-text-muted);line-height:1.55;max-width:960px;">
+    <strong style="color:var(--color-text);">Quick tips:</strong> The page always keeps a local backup in this browser. Use Download Backup for extra safety, and Upload Backup if you move devices. Google Drive sync remains optional.
+  </div>
+</div><!-- /page -->
+
+
+<!-- Client ID Setup Modal -->
+<div class="modal-overlay" id="setupModal">
+  <div class="modal">
+    <div class="modal-title">🔑 Enter Google Client ID</div>
+    <div class="modal-body">
+      Paste your Google OAuth Client ID below. You only need to do this once — it will be remembered in this browser.<br><br>
+      <strong>Format:</strong> <code style="font-size:11px;background:#f0f3fa;padding:2px 6px;border-radius:4px;">xxxxxxx.apps.googleusercontent.com</code>
+    </div>
+    <div style="margin-bottom:16px;">
+      <input type="text" id="clientIdInputModal" placeholder="Paste your Client ID here..." style="width:100%;padding:10px 12px;border:1.5px solid #d0d7e2;border-radius:8px;font-size:14px;font-family:inherit;outline:none;" />
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-secondary" onclick="closeSetupModal()">Cancel</button>
+      <button class="modal-btn modal-btn-primary" onclick="submitClientId()">Save &amp; Sign In</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- Floating Save FAB (shown when signed in) -->
+<button class="fab-save hidden" id="fabSave" onclick="saveToDrive()" title="Save to Google Drive">
+  ☁
+</button>
+
+<!-- Google Identity Services -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+
+<script>
+// ─────────────────────────────────────────────
+// CONFIG
+// ─────────────────────────────────────────────
+const DRIVE_FILE_NAME = 'daily-entry-data.json';
+const DRIVE_MIME = 'application/json';
+const SCOPES = 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file';
+
+let CLIENT_ID = '';
+let accessToken = null;
+let driveFileId = null;
+let isSignedIn = false;
+let tokenClient = null;
+let authReady = false;
+let driveSaveQueued = false;
+let driveSaveTimer = null;
+
+// ─────────────────────────────────────────────
+// IN-MEMORY DATA STORE
+// ─────────────────────────────────────────────
+const tableData = { 1: [], 2: [], 3: [], 4: [] };
+
+function backupLocal() {
+  try { localStorage.setItem('dailyEntryBackup', JSON.stringify(tableData)); } catch(e) {}
+}
+function restoreLocal() {
+  try {
+    const raw = localStorage.getItem('dailyEntryBackup');
+    if (!raw) return false;
+    const data = JSON.parse(raw);
+    if (data && typeof data === 'object') {
+      Object.assign(tableData, data);
+      return true;
+    }
+  } catch(e) {}
+  return false;
+}
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+const today = new Date();
+document.getElementById('topbarDate').textContent =
+  today.toLocaleDateString('en-IN', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+const todayStr = today.toISOString().split('T')[0];
+['t1_date','t2_date','t3_date','t4_date'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.value = todayStr;
+});
+
+// Load saved Client ID from localStorage
+function initClientId() {
+  try {
+    const saved = localStorage.getItem('gdrive_client_id');
+    if (saved) {
+      CLIENT_ID = saved;
+      // setup panel removed
+      // clientIdInput removed from UI
+      initTokenClient();
+    }
+  } catch(e) {}
+}
+
+function saveClientId() {
+  const val = document.getElementById('clientIdInput').value.trim();
+  if (!val || !val.includes('.apps.googleusercontent.com')) {
+    showToast('Please enter a valid Client ID ending in .apps.googleusercontent.com', 'error');
+    return;
+  }
+  try { localStorage.setItem('gdrive_client_id', val); } catch(e) {}
+  CLIENT_ID = val;
+  // setup panel removed
+  initTokenClient();
+  showToast('✓ Client ID saved! Click "Sign in with Google" to connect.', 'success');
+}
+
+function initTokenClient() {
+  if (!CLIENT_ID || typeof google === 'undefined') {
+    setTimeout(initTokenClient, 500);
+    return;
+  }
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: CLIENT_ID,
+    scope: SCOPES,
+    callback: (resp) => {
+      if (resp.error) {
+        setSyncStatus('error', 'Sign-in failed: ' + resp.error);
+        setSetupStatus('Sign-in failed: ' + resp.error, false);
+        showAuthError('Sign-in failed: ' + resp.error);
+        return;
+      }
+      accessToken = resp.access_token;
+      isSignedIn = true;
+      try { sessionStorage.setItem('gd_token', accessToken); } catch(e) {}
+      const btn = document.getElementById('btnSignIn'); if (btn) btn.disabled = false;
+      setSyncStatus('ok', 'Signed in to Google Drive');
+      setSetupStatus('Google sign-in ready', true);
+      fetchUserInfo();
+      onSignedIn();
+      maybeFlushQueuedDriveSave();
+    }
+  });
+}
+
+initClientId();
+if (!CLIENT_ID) { const i=document.getElementById('setupInner'); if (i) i.style.display='block'; }
+if (restoreLocal()) showToast('✓ Loaded local backup', 'success');
+[1,2,3,4].forEach(t => renderTable(t));
+const s = document.getElementById('authStatus'); if (s) s.style.display='none';
+
+// ─────────────────────────────────────────────
+// AUTH
+// ─────────────────────────────────────────────
+function signIn() {
+  if (!CLIENT_ID) {
+    showToast('Paste your Client ID in the setup box first.', 'error');
+    return;
+  }
+  if (!tokenClient) {
+    initTokenClient();
+    setTimeout(() => tokenClient && tokenClient.requestAccessToken({ prompt: '' }), 800);
+    return;
+  }
+  tokenClient.requestAccessToken({ prompt: '' });
+}
+
+function signOut() {
+  if (accessToken) {
+    google.accounts.oauth2.revoke(accessToken, () => {});
+  }
+  accessToken = null;
+  driveFileId = null;
+  isSignedIn = false;
+  document.getElementById('btnSignIn').style.display = '';
+  document.getElementById('signedInActions').style.display = 'none';
+  document.getElementById('fabSave').classList.add('hidden');
+  setSyncStatus('hidden', '');
+  showToast('Signed out from Google Drive');
+}
+
+function onSignedIn() {
+  document.getElementById('btnSignIn').style.display = 'none';
+  document.getElementById('signedInActions').style.display = 'flex';
+  document.getElementById('fabSave').classList.remove('hidden');
+  setSyncStatus('ok', 'Connected to Google Drive · Auto-save enabled');
+  showToast('✓ Signed in to Google Drive!', 'success');
+  // Try to auto-load existing data
+  autoLoadFromDrive();
+}
+
+async function fetchUserInfo() {
+  try {
+    const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+      headers: { Authorization: 'Bearer ' + accessToken }
+    });
+    const info = await res.json();
+    document.getElementById('userName').textContent = info.given_name || info.name || 'User';
+    if (info.picture) {
+      document.getElementById('userAvatar').innerHTML = `<img src="${info.picture}" alt="avatar" width="26" height="26">`;
+    } else {
+      document.getElementById('userAvatar').textContent = (info.name || 'U')[0].toUpperCase();
+    }
+  } catch(e) {}
+}
+
+// ─────────────────────────────────────────────
+// GOOGLE DRIVE API
+// ─────────────────────────────────────────────
+async function driveRequest(url, options = {}) {
+  if (!accessToken) throw new Error('Not authenticated');
+  const headers = { Authorization: 'Bearer ' + accessToken, ...options.headers };
+  const res = await fetch(url, { ...options, headers });
+  if (res.status === 401) {
+    accessToken = null;
+    isSignedIn = false;
+    showToast('Session expired. Please sign in again.', 'error');
+    throw new Error('Unauthorized');
+  }
+  return res;
+}
+
+async function findOrCreateFile() {
+  // Search in appDataFolder first, then drive.file scope
+  const searchRes = await driveRequest(
+    `https://www.googleapis.com/drive/v3/files?q=name='${DRIVE_FILE_NAME}'&spaces=appDataFolder,drive&fields=files(id,name,modifiedTime)`
+  );
+  const data = await searchRes.json();
+  if (data.files && data.files.length > 0) {
+    driveFileId = data.files[0].id;
+    return driveFileId;
+  }
+  return null;
+}
+
+async function saveToDrive() {
+  if (!isSignedIn) { showToast('Please sign in to Google Drive first'); return; }
+  setSyncStatus('syncing', 'Saving to Google Drive…');
+  showLoading('Saving to Google Drive…');
+  try {
+    const payload = JSON.stringify({
+      version: 4,
+      savedAt: new Date().toISOString(),
+      tables: tableData
+    }, null, 2);
+
+    const existingId = await findOrCreateFile();
+
+    let res;
+    if (existingId) {
+      // Update existing file
+      res = await driveRequest(
+        `https://www.googleapis.com/upload/drive/v3/files/${existingId}?uploadType=media`,
+        { method: 'PATCH', headers: { 'Content-Type': DRIVE_MIME }, body: payload }
+      );
+    } else {
+      // Create new file
+      const meta = JSON.stringify({ name: DRIVE_FILE_NAME, parents: ['appDataFolder'] });
+      const form = new FormData();
+      form.append('metadata', new Blob([meta], { type: 'application/json' }));
+      form.append('file', new Blob([payload], { type: DRIVE_MIME }));
+      res = await driveRequest(
+        'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',
+        { method: 'POST', body: form }
+      );
+      const newFile = await res.json();
+      driveFileId = newFile.id;
+    }
+
+    setSyncStatus('ok', 'Saved to Google Drive · ' + new Date().toLocaleTimeString('en-IN'));
+    setSetupStatus('Google Drive sync successful', true);
+    showToast('✓ Saved to Google Drive!', 'success');
+  } catch(e) {
+    setSyncStatus('error', 'Save failed: ' + e.message);
+    setSetupStatus('Google Drive sync failed: ' + e.message, false);
+    showToast('Save failed: ' + e.message, 'error');
+  } finally {
+    hideLoading();
+  }
+}
+
+async function loadFromDrive() {
+  if (!isSignedIn) { showToast('Please sign in to Google Drive first'); return; }
+  openModal(
+    'Load from Google Drive',
+    'This will replace all current entries with data from your Google Drive. Any unsaved entries will be lost.',
+    async () => {
+      closeModal();
+      setSyncStatus('syncing', 'Loading from Google Drive…');
+      showLoading('Loading from Google Drive…');
+      try {
+        const fileId = await findOrCreateFile();
+        if (!fileId) {
+          hideLoading();
+          setSyncStatus('ok', 'No saved data found on Google Drive');
+          showToast('No saved data found on Google Drive yet');
+          return;
+        }
+        const res = await driveRequest(
+          `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`
+        );
+        const data = await res.json();
+        if (data.tables) {
+          Object.assign(tableData, data.tables);
+          [1,2,3,4].forEach(t => renderTable(t));
+          syncAllBackups();
+          const savedAt = data.savedAt ? new Date(data.savedAt).toLocaleString('en-IN') : 'unknown';
+          setSyncStatus('ok', 'Loaded from Google Drive · Saved: ' + savedAt);
+          showToast('✓ Data loaded from Google Drive!', 'success');
+        }
+      } catch(e) {
+        setSyncStatus('error', 'Load failed: ' + e.message);
+        showToast('Load failed: ' + e.message, 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+  );
+}
+
+async function autoLoadFromDrive() {
+  try {
+    const allEmpty = [1,2,3,4].every(t => tableData[t].length === 0);
+    if (!allEmpty) return; // don't overwrite if user already has data
+    setSyncStatus('syncing', 'Checking Google Drive for saved data…');
+    const fileId = await findOrCreateFile();
+    if (!fileId) { setSyncStatus('ok', 'Connected · No previous data found'); return; }
+    const res = await driveRequest(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`);
+    const data = await res.json();
+    if (data.tables) {
+      Object.assign(tableData, data.tables);
+      [1,2,3,4].forEach(t => renderTable(t));
+      syncAllBackups();
+      const savedAt = data.savedAt ? new Date(data.savedAt).toLocaleString('en-IN') : '?';
+      setSyncStatus('ok', 'Loaded from Drive · Last saved: ' + savedAt);
+      showToast('✓ Previous data loaded from Google Drive', 'success');
+    }
+  } catch(e) {
+    setSyncStatus('ok', 'Connected to Google Drive');
+  }
+}
+
+// ─────────────────────────────────────────────
+// TABLE LOGIC
+// ─────────────────────────────────────────────
+function formatNum(v) {
+  if (v === '' || v == null) return '—';
+  const n = parseFloat(v);
+  if (isNaN(n)) return v || '—';
+  return n.toLocaleString('en-IN');
+}
+function fmtDate(d) {
+  if (!d) return '—';
+  const p = d.split('-');
+  return p.length === 3 ? p[2]+'/'+p[1]+'/'+p[0].slice(2) : d;
+}
+
+function buildRow(t, entry, idx) {
+  const tr = document.createElement('tr');
+  let cells = '';
+  if (t === 1) {
+    cells = `<td>${entry.name}</td><td>${fmtDate(entry.date)}</td><td>${entry.qty||'—'}</td><td>${entry.paid ? '₹'+formatNum(entry.paid) : '—'}</td>`;
+  } else if (t === 2) {
+    cells = `<td>${entry.name}</td><td>${fmtDate(entry.date)}</td><td>${entry.num||'—'}</td><td>${entry.val ? '₹'+formatNum(entry.val) : '—'}</td><td>${entry.gst||'—'}</td>`;
+  } else if (t === 3) {
+    cells = `<td>${entry.name}</td><td>${fmtDate(entry.date)}</td><td>${entry.ssmm||'—'}</td><td>${entry.bill||'—'}</td><td>${entry.amt ? '₹'+formatNum(entry.amt) : '—'}</td><td>${entry.cash ? '₹'+formatNum(entry.cash) : '—'}</td><td>${entry.credit||'—'}</td><td>${entry.bal ? '₹'+formatNum(entry.bal) : '—'}</td><td>${entry.ref||'—'}</td>`;
+  } else if (t === 4) {
+    cells = `<td>${fmtDate(entry.date)}</td><td>${entry.cash ? '₹'+formatNum(entry.cash) : '—'}</td><td>${entry.chq ? '₹'+formatNum(entry.chq) : '—'}</td><td>${entry.no||'—'}</td><td>${entry.k2 ? '₹'+formatNum(entry.k2) : '—'}</td><td>${entry.ref||'—'}</td><td>${entry.credit||'—'}</td><td>${entry.bank||'—'}</td>`;
+  }
+  cells += `<td><button class="delete-btn" onclick="deleteRow(${t},${idx})" title="Delete row">✕</button></td>`;
+  tr.innerHTML = cells;
+  return tr;
+}
+
+function renderTable(t) {
+  const tbody = document.getElementById('tbody' + t);
+  tbody.innerHTML = '';
+  if (tableData[t].length === 0) {
+    const colspans = { 1:5, 2:6, 3:10, 4:9 };
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="${colspans[t]}">No entries yet — add one below</td></tr>`;
+  } else {
+    tableData[t].forEach((entry, i) => tbody.appendChild(buildRow(t, entry, i)));
+  }
+  updateCount(t);
+}
+
+function updateCount(t) {
+  const n = tableData[t].length;
+  document.getElementById('count' + t).textContent = n + (n === 1 ? ' entry' : ' entries');
+}
+
+function scrollToBottom(t) {
+  const scroll = document.getElementById('tbody' + t).closest('.table-scroll');
+  setTimeout(() => scroll.scrollTop = scroll.scrollHeight, 50);
+}
+
+function deleteRow(t, idx) {
+  tableData[t].splice(idx, 1);
+  renderTable(t);
+  syncAllBackups();
+  queueDriveAutosave();
+}
+
+// ── Add row functions
+function addRow(t) {
+  let entry = {};
+  if (t === 1) {
+    const name = document.getElementById('t1_name').value.trim();
+    if (!name) { alert('Please enter Supplier / Name'); document.getElementById('t1_name').focus(); return; }
+    entry = { name, date: document.getElementById('t1_date').value, qty: document.getElementById('t1_qty').value, paid: document.getElementById('t1_paid').value };
+    ['t1_name','t1_qty','t1_paid'].forEach(id => document.getElementById(id).value='');
+    document.getElementById('t1_date').value = todayStr;
+    showToast('✓ Bangalore Parcel entry added!');
+    document.getElementById('t1_name').focus();
+  } else if (t === 2) {
+    const name = document.getElementById('t2_name').value.trim();
+    if (!name) { alert('Please enter Supplier Name'); document.getElementById('t2_name').focus(); return; }
+    entry = { name, date: document.getElementById('t2_date').value, num: document.getElementById('t2_num').value.trim(), val: document.getElementById('t2_val').value, gst: document.getElementById('t2_gst').value.trim() };
+    ['t2_name','t2_num','t2_val','t2_gst'].forEach(id => document.getElementById(id).value='');
+    document.getElementById('t2_date').value = todayStr;
+    showToast('✓ Supplier entry added!');
+    document.getElementById('t2_name').focus();
+  } else if (t === 3) {
+    const name = document.getElementById('t3_name').value.trim();
+    if (!name) { alert('Please enter Customer Name / Mobile'); document.getElementById('t3_name').focus(); return; }
+    entry = { name, date: document.getElementById('t3_date').value, ssmm: document.getElementById('t3_ssmm').value.trim(), bill: document.getElementById('t3_bill').value.trim(), amt: document.getElementById('t3_amt').value, cash: document.getElementById('t3_cash').value, credit: document.getElementById('t3_credit').value.trim(), bal: document.getElementById('t3_bal').value, ref: document.getElementById('t3_ref').value.trim() };
+    ['t3_name','t3_ssmm','t3_bill','t3_amt','t3_cash','t3_credit','t3_bal','t3_ref'].forEach(id => document.getElementById(id).value='');
+    document.getElementById('t3_date').value = todayStr;
+    showToast('✓ Customer entry added!');
+    document.getElementById('t3_name').focus();
+  } else if (t === 4) {
+    const cash = document.getElementById('t4_cash').value, chq = document.getElementById('t4_chq').value, no = document.getElementById('t4_no').value.trim();
+    if (!cash && !chq && !no) { alert('Please fill in at least one value (Cash, Cheques, or No.)'); document.getElementById('t4_cash').focus(); return; }
+    entry = { date: document.getElementById('t4_date').value, cash, chq, no, k2: document.getElementById('t4_k2').value, ref: document.getElementById('t4_ref').value.trim(), credit: document.getElementById('t4_credit').value.trim(), bank: document.getElementById('t4_bank').value.trim() };
+    ['t4_cash','t4_chq','t4_no','t4_k2','t4_ref','t4_credit','t4_bank'].forEach(id => document.getElementById(id).value='');
+    document.getElementById('t4_date').value = todayStr;
+    showToast('✓ Daily Collection entry added!');
+    document.getElementById('t4_cash').focus();
+  }
+  tableData[t].push(entry);
+  renderTable(t);
+  scrollToBottom(t);
+  syncAllBackups();
+  queueDriveAutosave();
+}
+
+// ── Enter key
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  const card = document.activeElement.closest('.table-card');
+  if (!card) return;
+  const idx = [...card.parentElement.children].indexOf(card) + 1;
+  if (idx >= 1 && idx <= 4) addRow(idx);
+});
+
+// ─────────────────────────────────────────────
+// AUTO-SAVE DEBOUNCE (save 3s after last change)
+// ─────────────────────────────────────────────
+let saveTimer = null;
+function scheduleSave() {
+  if (!isSignedIn) return;
+  clearTimeout(saveTimer);
+  setSyncStatus('syncing', 'Saving…');
+  saveTimer = setTimeout(() => saveToDrive(), 3000);
+}
+
+
+// ─────────────────────────────────────────────
+// OFFLINE BACKUP HELPERS
+// ─────────────────────────────────────────────
+function serializeState() {
+  return JSON.stringify({ version: 3, savedAt: new Date().toISOString(), tables: tableData }, null, 2);
+}
+function setSetupStatus(msg, ok=true) { const el = document.getElementById('setupStatus'); if (el) { el.textContent = msg; el.style.color = ok ? 'var(--color-success)' : 'var(--color-error)'; } }
+function saveLocalBackupNow() {
+  try { localStorage.setItem('dailyEntryBackup', serializeState()); showToast('✓ Saved locally on this device', 'success'); } catch(e) { showAuthError('Local save failed'); }
+}
+function downloadBackup() {
+  const blob = new Blob([serializeState()], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'daily-entry-backup.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+async function uploadBackup(ev) {
+  const file = ev.target.files && ev.target.files[0];
+  if (!file) return;
+  const txt = await file.text();
+  const data = JSON.parse(txt);
+  if (!data.tables) throw new Error('Invalid backup file');
+  Object.assign(tableData, data.tables);
+  [1,2,3,4].forEach(renderTable);
+  syncAllBackups();
+  showToast('✓ Backup imported', 'success');
+}
+function syncAllBackups() {
+  syncAllBackups();
+  saveLocalBackupNow();
+}
+// ─────────────────────────────────────────────
+// UI HELPERS
+// ─────────────────────────────────────────────
+function setSyncStatus(state, msg) {
+  const bar = document.getElementById('syncBar');
+  bar.className = 'sync-bar' + (state === 'hidden' ? ' hidden' : state === 'syncing' ? ' syncing' : state === 'error' ? ' error' : '');
+  document.getElementById('syncMsg').textContent = msg;
+}
+
+let toastTimer;
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = (type === 'success' ? 'show success' : type === 'error' ? 'show error-toast' : 'show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.className = '', 2500);
+}
+
+function showAuthError(msg) { const a = document.getElementById('authStatus'); if (a) { a.style.display='inline'; a.textContent = msg; } showToast(msg, 'error'); const btn = document.getElementById('btnSignIn'); if (btn) btn.disabled = false; }
+function showLoading(msg) {
+  document.getElementById('loadingText').textContent = msg || 'Loading…';
+  document.getElementById('loadingOverlay').classList.add('show');
+}
+function hideLoading() {
+  document.getElementById('loadingOverlay').classList.remove('show');
+}
+
+let modalCallback = null;
+function openModal(title, body, cb) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalBody').textContent = body;
+  modalCallback = cb;
+  document.getElementById('confirmModal').classList.add('show');
+  document.getElementById('modalConfirmBtn').onclick = cb;
+}
+function closeModal() {
+  document.getElementById('confirmModal').classList.remove('show');
+}
+</script>
+
+<!-- Copyright Footer -->
+<div style="text-align:center; padding: 18px 16px 30px; font-size: 12px; color: var(--color-text-faint); font-family: var(--font-body);">
+  &copy; 2026 <strong style="color:var(--color-text-muted);">Sagar1999</strong> &nbsp;·&nbsp; All rights reserved
+</div>
+</body>
+</html>
